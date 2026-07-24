@@ -10,6 +10,18 @@
 - **전사 관리** — 복사, `.txt` 다운로드, 지우기
 - **녹음 기록** — 세션 내 녹음 목록에서 재생, 오디오/전사 다운로드, 삭제
 
+## 📱 모바일 앱으로 설치 (PWA)
+
+이 앱은 PWA(Progressive Web App)라서 폰 홈 화면에 설치하면 일반 앱처럼 동작합니다.
+
+1. 배포된 주소를 폰 브라우저로 엽니다 — GitHub Pages 배포 시 `https://polarbears78.github.io/mice/`
+2. **Android (Chrome)**: 메뉴(⋮) → "홈 화면에 추가" 또는 "앱 설치"
+3. **iPhone (Safari)**: 공유 버튼 → "홈 화면에 추가"
+
+설치하면 전체 화면 앱으로 실행되고, 서비스 워커 캐시 덕분에 오프라인에서도 열립니다 (녹음은 오프라인 가능, 전사는 인터넷 필요).
+
+> `main` 브랜치에 푸시하면 GitHub Actions가 자동으로 GitHub Pages에 배포합니다 (`.github/workflows/deploy.yml`).
+
 ## 실행 방법
 
 정적 파일이므로 아무 웹 서버로나 서빙하면 됩니다:
@@ -38,9 +50,12 @@ npx serve .
 ## 파일 구성
 
 ```
-index.html   # 앱 구조 (UI)
-style.css    # 스타일 (라이트/다크 모드 지원)
-app.js       # 녹음·전사·시각화 로직
+index.html            # 앱 구조 (UI)
+style.css             # 스타일 (라이트/다크 모드, 모바일 대응)
+app.js                # 녹음·전사·시각화 로직
+manifest.webmanifest  # PWA 매니페스트 (홈 화면 설치)
+sw.js                 # 서비스 워커 (오프라인 캐시)
+icons/                # 앱 아이콘
 ```
 
 ## 참고 사항

@@ -35,7 +35,8 @@ body {
 .app {
   max-width: 720px;
   margin: 0 auto;
-  padding: 24px 16px 64px;
+  padding: calc(24px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
+    calc(64px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
 }
 
 header { text-align: center; margin-bottom: 24px; }
@@ -202,3 +203,21 @@ select {
 }
 
 .recording-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* 모바일: 터치하기 쉽게 버튼을 키우고 주요 버튼을 전체 폭으로 */
+@media (max-width: 480px) {
+  header h1 { font-size: 1.45rem; }
+  .card { padding: 16px; }
+
+  .buttons { gap: 8px; }
+  .btn { padding: 14px 18px; font-size: 1rem; }
+  .btn-small { padding: 8px 14px; font-size: 0.88rem; }
+
+  .btn-record {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+  #pauseBtn, #stopBtn { flex: 1; }
+
+  .transcript { font-size: 1.05rem; }
+}
