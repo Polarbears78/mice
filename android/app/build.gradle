@@ -6,7 +6,7 @@ def keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
 
 android {
     namespace 'io.github.polarbears78.mice'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "io.github.polarbears78.mice"
