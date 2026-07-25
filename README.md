@@ -58,6 +58,10 @@ sw.js                 # 서비스 워커 (오프라인 캐시)
 icons/                # 앱 아이콘
 ```
 
+## 📲 Google Play 등록
+
+Play Store 등록용 TWA 안드로이드 프로젝트가 `android/` 에 포함되어 있습니다. Actions의 **Build Android App (TWA)** 워크플로를 실행하면 등록용 AAB 파일이 빌드됩니다. 자세한 단계는 [PLAY_STORE.md](PLAY_STORE.md)를 참고하세요.
+
 ## 참고 사항
 
 - 녹음 기록은 브라우저 메모리에만 유지되며, 페이지를 새로고침하면 사라집니다. 보관이 필요한 녹음은 다운로드 버튼으로 저장하세요.

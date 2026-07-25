@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - claude/recording-transcription-app-trofbe
   workflow_dispatch:
 
 permissions:

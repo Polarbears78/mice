@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">녹음 &amp; 전사</string>
+    <!-- 웹사이트와 앱을 연결하는 Digital Asset Links 선언.
+         사이트 쪽 .well-known/assetlinks.json 과 쌍을 이룬다. -->
+    <string name="asset_statements">
+        [{
+            \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+            \"target\": {
+                \"namespace\": \"web\",
+                \"site\": \"https://polarbears78.github.io\"
+            }
+        }]
+    </string>
+</resources>
