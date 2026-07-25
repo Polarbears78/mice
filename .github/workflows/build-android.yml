@@ -1,0 +1,83 @@
+name: Build Android App (TWA)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'android/**'
+      - '.github/workflows/build-android.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # 서명 키 준비: 시크릿에 저장된 키가 있으면 사용하고,
+      # 없으면 새로 생성한다 (생성된 키는 아티팩트로 내려받아 보관할 것).
+      - name: Prepare signing keystore
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS_SECRET: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/ks"
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/ks/upload.jks"
+            echo "KS_PASS=$KS_PASS_SECRET" >> "$GITHUB_ENV"
+            echo "KS_GENERATED=false" >> "$GITHUB_ENV"
+            echo "기존 시크릿의 서명 키를 사용합니다."
+          else
+            PASS=$(openssl rand -hex 16)
+            keytool -genkeypair -v \
+              -keystore "$RUNNER_TEMP/ks/upload.jks" \
+              -alias upload -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$PASS" -keypass "$PASS" \
+              -dname "CN=Recording Transcription, O=Polarbears78, C=KR"
+            echo "$PASS" > "$RUNNER_TEMP/ks/keystore-password.txt"
+            echo "KS_PASS=$PASS" >> "$GITHUB_ENV"
+            echo "KS_GENERATED=true" >> "$GITHUB_ENV"
+            echo "::warning::새 서명 키를 생성했습니다. 'upload-keystore' 아티팩트를 내려받아 안전한 곳에 보관하고, ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD 시크릿으로 등록한 뒤 아티팩트를 삭제하세요."
+          fi
+          keytool -list -v -keystore "$RUNNER_TEMP/ks/upload.jks" \
+            -storepass "$KS_PASS" -alias upload 2>/dev/null | grep -A1 "SHA256:" \
+            > "$RUNNER_TEMP/ks/cert-sha256.txt" || true
+        # KS_PASS는 아래 빌드 단계에서만 쓰인다
+
+      - name: Build release AAB and APK
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/ks/upload.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ env.KS_PASS }}
+          ANDROID_KEY_ALIAS: upload
+        run: |
+          gradle wrapper --gradle-version 8.7
+          ./gradlew --no-daemon bundleRelease assembleRelease
+
+      - name: Copy cert fingerprint next to outputs
+        run: cp "$RUNNER_TEMP/ks/cert-sha256.txt" android/app/build/outputs/ 2>/dev/null || true
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: play-release
+          path: |
+            android/app/build/outputs/bundle/release/app-release.aab
+            android/app/build/outputs/apk/release/app-release.apk
+            android/app/build/outputs/cert-sha256.txt
+
+      # 새로 생성된 키만 아티팩트로 노출된다.
+      # 반드시 내려받아 시크릿으로 옮긴 뒤 이 아티팩트를 삭제할 것.
+      - name: Upload generated keystore (first run only)
+        if: env.KS_GENERATED == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: upload-keystore
+          path: ${{ runner.temp }}/ks/
+          retention-days: 3
