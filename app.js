@@ -36,6 +36,8 @@
   let audioContext = null;
   let analyser = null;
   let animationId = null;
+  let recogStartedAt = 0;
+  let rapidEndCount = 0;
   const recordings = [];
 
   if (!speechSupported) {
@@ -141,7 +143,12 @@
     recognition.continuous = true;
     recognition.interimResults = true;
 
+    recognition.onstart = () => {
+      recogStartedAt = Date.now();
+    };
+
     recognition.onresult = (event) => {
+      rapidEndCount = 0;
       interimTranscript = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
@@ -156,19 +163,33 @@
 
     recognition.onerror = (event) => {
       // no-speech / aborted는 정상 흐름에서 발생하므로 조용히 넘어간다
-      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-        setStatus("음성 인식 권한이 거부되어 전사 없이 녹음만 진행됩니다.");
+      const messages = {
+        "network": "네트워크 오류 — 인터넷 연결을 확인해 주세요.",
+        "not-allowed": "음성 인식 권한이 거부되었습니다. 브라우저의 마이크 권한을 확인해 주세요.",
+        "service-not-allowed": "이 브라우저/모드에서 음성 인식 서비스가 차단되어 있습니다.",
+        "audio-capture": "음성 인식이 마이크를 사용할 수 없습니다. 다른 앱이 마이크를 점유 중일 수 있습니다.",
+        "language-not-supported": "선택한 언어를 이 기기의 음성 인식이 지원하지 않습니다.",
+      };
+      if (messages[event.error]) {
+        setStatus(`전사 오류 [${event.error}]: ${messages[event.error]} (녹음은 계속됩니다)`);
       }
     };
 
-    // 브라우저가 인식 세션을 수시로 끊기 때문에 녹음 중에는 자동 재시작
+    // 브라우저가 인식 세션을 수시로 끊기 때문에 녹음 중에는 자동 재시작.
+    // 단, 시작 직후 반복해서 끊기면 (기기 비호환·서비스 불가) 재시도를 멈추고 알린다.
     recognition.onend = () => {
-      if (recording && !paused) {
-        try {
-          recognition.start();
-        } catch (_) {
-          /* 이미 시작된 경우 무시 */
-        }
+      if (!recording || paused) return;
+      rapidEndCount = Date.now() - recogStartedAt < 1000 ? rapidEndCount + 1 : 0;
+      if (rapidEndCount >= 8) {
+        setStatus(
+          "전사를 시작할 수 없어 중단했습니다. 인터넷 연결과 마이크 상태를 확인한 뒤 녹음을 다시 시작해 주세요. (녹음은 계속됩니다)"
+        );
+        return;
+      }
+      try {
+        recognition.start();
+      } catch (_) {
+        /* 이미 시작된 경우 무시 */
       }
     };
 
@@ -230,6 +251,7 @@
     audioChunks = [];
     finalTranscript = "";
     interimTranscript = "";
+    rapidEndCount = 0;
     renderTranscript();
 
     const mimeType = pickMimeType();
