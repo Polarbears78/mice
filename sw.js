@@ -1,4 +1,4 @@
-const CACHE_NAME = "rec-transcribe-v1";
+const CACHE_NAME = "rec-transcribe-v2";
 const ASSETS = [
   ".",
   "index.html",
