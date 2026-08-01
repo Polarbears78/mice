@@ -40,7 +40,16 @@
   let rapidEndCount = 0;
   const recordings = [];
 
-  if (!speechSupported) {
+  // iPhone 홈 화면 앱(standalone 모드)에서는 iOS 제약으로 음성 인식이 동작하지 않는다
+  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isStandalone = navigator.standalone === true ||
+    window.matchMedia("(display-mode: standalone)").matches;
+  const iosStandalone = isIos && isStandalone;
+
+  if (iosStandalone) {
+    document.getElementById("iosStandaloneWarning").classList.remove("hidden");
+  } else if (!speechSupported) {
     speechWarning.classList.remove("hidden");
   }
 
@@ -136,7 +145,7 @@
 
   // ---- 음성 인식 ----
   function startRecognition() {
-    if (!speechSupported) return;
+    if (!speechSupported || iosStandalone) return;
 
     recognition = new SpeechRecognition();
     recognition.lang = languageSelect.value;
@@ -287,9 +296,9 @@
     stopBtn.disabled = false;
     languageSelect.disabled = true;
     setStatus(
-      speechSupported
+      speechSupported && !iosStandalone
         ? "녹음 및 실시간 전사가 진행 중입니다."
-        : "녹음이 진행 중입니다. (이 브라우저에서는 전사가 지원되지 않습니다)"
+        : "녹음이 진행 중입니다. (이 모드에서는 전사가 지원되지 않습니다)"
     );
   }
 
