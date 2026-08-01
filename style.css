@@ -156,6 +156,8 @@ a.btn { text-decoration: none; text-align: center; }
 .btn-install.hidden { display: none; }
 
 #iosInstallGuide { margin-top: 10px; }
+#safariFallback { margin-top: 10px; }
+#safariFallback .btn { margin-top: 8px; }
 
 .status { color: var(--muted); font-size: 0.88rem; margin: 14px 0 0; }
 
