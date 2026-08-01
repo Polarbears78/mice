@@ -54,6 +54,38 @@
     speechWarning.classList.remove("hidden");
   }
 
+  // ---- 홈 화면 설치 버튼 ----
+  // Android/PC Chrome은 설치 API(beforeinstallprompt)를 지원하고,
+  // iOS는 API가 없어 수동 설치 안내를 보여준다. 이미 설치 모드면 표시하지 않는다.
+  const installBtn = document.getElementById("installBtn");
+  const iosInstallGuide = document.getElementById("iosInstallGuide");
+  let deferredInstallPrompt = null;
+
+  if (!isStandalone) {
+    if (isIos) {
+      installBtn.classList.remove("hidden");
+      installBtn.addEventListener("click", () => {
+        iosInstallGuide.classList.toggle("hidden");
+      });
+    } else {
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        installBtn.classList.remove("hidden");
+      });
+      installBtn.addEventListener("click", async () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        installBtn.classList.add("hidden");
+      });
+      window.addEventListener("appinstalled", () => {
+        installBtn.classList.add("hidden");
+      });
+    }
+  }
+
   // ---- 유틸 ----
   function setStatus(message) {
     statusEl.textContent = message;
