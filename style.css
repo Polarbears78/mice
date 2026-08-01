@@ -144,6 +144,19 @@ a.btn { text-decoration: none; text-align: center; }
 .btn-safari:hover { background: var(--accent); opacity: 0.9; }
 .btn-safari.hidden { display: none; }
 
+.btn-install {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.btn-install.hidden { display: none; }
+
+#iosInstallGuide { margin-top: 10px; }
+
 .status { color: var(--muted); font-size: 0.88rem; margin: 14px 0 0; }
 
 .warning {
