@@ -130,6 +130,20 @@ select {
 
 .btn-small { padding: 5px 12px; font-size: 0.85rem; }
 
+a.btn { text-decoration: none; text-align: center; }
+
+.btn-safari {
+  display: block;
+  margin-top: 12px;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-safari:hover { background: var(--accent); opacity: 0.9; }
+.btn-safari.hidden { display: none; }
+
 .status { color: var(--muted); font-size: 0.88rem; margin: 14px 0 0; }
 
 .warning {

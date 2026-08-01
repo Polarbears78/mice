@@ -49,6 +49,7 @@
 
   if (iosStandalone) {
     document.getElementById("iosStandaloneWarning").classList.remove("hidden");
+    document.getElementById("openSafariBtn").classList.remove("hidden");
   } else if (!speechSupported) {
     speechWarning.classList.remove("hidden");
   }
