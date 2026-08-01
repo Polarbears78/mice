@@ -50,6 +50,20 @@
   if (iosStandalone) {
     document.getElementById("iosStandaloneWarning").classList.remove("hidden");
     document.getElementById("openSafariBtn").classList.remove("hidden");
+
+    // x-safari- 스킴(iOS 17+)이 동작하지 않는 기기를 위한 수동 안내
+    const safariFallback = document.getElementById("safariFallback");
+    document.getElementById("openSafariBtn").addEventListener("click", () => {
+      setTimeout(() => safariFallback.classList.remove("hidden"), 1500);
+    });
+    document.getElementById("copyUrlBtn").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText("https://polarbears78.github.io/mice/");
+        document.getElementById("copyUrlBtn").textContent = "복사됨!";
+      } catch (_) {
+        /* 클립보드 미지원 시 무시 */
+      }
+    });
   } else if (!speechSupported) {
     speechWarning.classList.remove("hidden");
   }
